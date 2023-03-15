@@ -1,0 +1,15 @@
+---
+- hosts: 51.15.219.63
+  become: yes
+  tasks:
+    - name: create user
+      user:
+        name: ansible
+        createhome: yes
+        shell: /bin/bash
+    - name: set SSH key for user
+      authorized_key:
+        user: ansible
+        state: present
+        key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+

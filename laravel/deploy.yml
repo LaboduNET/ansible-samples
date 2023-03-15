@@ -1,0 +1,71 @@
+- hosts: web
+  vars:
+    - laravel_version: 10.x
+    - packages: ['nodejs','npm','mysql-client','php','php-cli','php-fpm','php-mysql','php-curl','php-json','php-xml','php-mbstring','php-bcmath','composer','nginx']
+  tasks:
+    
+    - name: Install MYSQLClient, NGINX, COMPOSER,PHP and required extensions
+      apt:
+        name: "{{ packages }}"
+        state: present
+        update_cache: yes
+      become: true
+      
+    - name: Clone Laravel repository
+      git:
+        repo: https://github.com/laravel/laravel.git
+        dest: /var/www/laravel
+        version: "{{ laravel_version }}"
+      become: true
+      
+    - name: Install Laravel dependencies
+      composer:
+        command: install
+        working_dir: /var/www/laravel
+      environment:
+        COMPOSER_NO_INTERACTION: "1"
+        COMPOSER_ALLOW_SUPERUSER: "1"        
+      become: true
+      
+    - name: Create .env file
+      template:
+        src: .env.j2
+        dest: /var/www/laravel/.env
+      become: true
+      
+    - name: Generate application key
+      command: php artisan key:generate
+      args:
+        chdir: /var/www/laravel
+      become: true
+      
+    - name: Change file ownership, group and permissions for laravel directory
+      file:
+        path: /var/www/laravel
+        owner: www-data
+        group: www-data
+#        mode: '664'
+        recurse: yes
+      become: true
+
+    - name: Configure nginx server block
+      template:
+        src: laravel.conf.j2
+        dest: /etc/nginx/sites-available/laravel.conf
+      become: true
+
+    - name: Remove default nginx
+      file:
+        path: /etc/nginx/site-enabled/default
+        state: absent
+
+    - name: Create symbolic link for laravel 
+      file:
+        src: /etc/nginx/sites-available/laravel.conf
+        dest: /etc/nginx/sites-enabled/laravel
+        state: link
+
+    - name: Redémarrage du service NGINX
+      service:
+        name: nginx
+        state: restarted

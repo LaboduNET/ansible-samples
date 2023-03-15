@@ -1,0 +1,12 @@
+---
+- hosts: web
+  become: true
+  vars:
+    sys_packages: ['git','curl']
+  tasks:
+    - name: install packages
+      apt:
+        name: "{{sys_packages}}"
+        update_cache: yes
+        state: latest
+
