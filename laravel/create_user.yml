@@ -1,5 +1,5 @@
 ---
-- hosts: 51.15.219.63
+- hosts: web
   become: yes
   tasks:
     - name: create user
