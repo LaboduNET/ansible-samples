@@ -1,0 +1,35 @@
+- hosts: web
+  vars:
+    - laravel_version: 10.x
+  tasks:
+          
+    - name: Fetch git repo
+      git:
+        repo: https://github.com/laravel/laravel.git
+        dest: /var/www/laravel
+        version: "{{ laravel_version }}"
+      become: true
+      
+    - name: Install Laravel dependencies
+      composer:
+        command: install
+        working_dir: /var/www/laravel
+      environment:
+        COMPOSER_NO_INTERACTION: "1"
+        COMPOSER_ALLOW_SUPERUSER: "1"        
+      become: true
+            
+    - name: GIT pull
+      become: true
+      tags:
+       - git_pull
+      git:
+       repo: https://github.com/laravel/laravel.git
+       dest: /var/www/laravel
+       update: yes
+       clone: no
+       version: "{{ laravel_version }}"
+
+    - name: Install packages based on package.json.
+      npm:
+        path: /var/www/laravel
