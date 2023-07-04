@@ -1,0 +1,17 @@
+#This ansible script is design to install all required packages for Laravel installation on UBUNTU 22.04
+- name: Install Required packages for Laravel on UBUNTU 22.04 (Takes Approximatively 4 min on SCW PLAY2-PICO)
+  hosts: web
+  vars:
+    - msg: "This is a local inline variable (not used)"
+  tasks:
+    - include_vars: variables.yml
+
+    - debug: msg="Using variables file {{ variable_file_name }}"
+    
+    - name: install mysql, nginx, composer,php and required extensions
+      apt:
+        name: "{{ packages_list }}"
+        state: present
+        update_cache: yes
+      become: true
+

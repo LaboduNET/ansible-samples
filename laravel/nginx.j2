@@ -1,0 +1,41 @@
+server {
+
+
+        root /var/www/{{ SITE_URL }}/shared/public;
+		add_header X-Frame-Options "SAMEORIGIN";
+		add_header X-Content-Type-Options "nosniff";
+        index index.php;
+        server_name {{ SITE_URL }}; 
+
+
+        location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+	location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.1-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/{{ SITE_URL }}/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/{{ SITE_URL }}/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = {{ SITE_URL }}) {
+        return 301 https://$host$request_uri;
+    } 
+
+
+        listen 80 ;
+        listen [::]:80 ;
+    server_name {{ SITE_URL }};
+    return 404; 
+
+
+}

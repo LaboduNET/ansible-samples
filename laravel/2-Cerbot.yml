@@ -1,0 +1,31 @@
+#IF YOU WANT A WILDCARD CERTIFICATE (available for all subdomain), don't use this script but execute this command once on the server:
+#certbot certonly --manual   --preferred-challenges=dns   --email yourmail@mail.com   --server https://acme-v02.api.letsencrypt.org/directory   --agree-tos   --manual-public-ip-logging-ok   -d "*.yourdomain.xxx"
+
+
+#This script configure use certbot to configure HTTPS on a sub-domain only
+#Before executing this command, ensure your sub-domain A RECORD is pointing to your server IP
+#HERE WE COULD IMPROVE THIS SCRIPT BY USING CONDITIONAL EXECUTION TO ENSURE THAT CERTBOT IS EXECUTED ONLY IF SUBDOMAIN IS POINTING ON THE VPS
+- name: Configure a staging sub-domain for HTTPS WITH CERBOT
+
+  hosts: web
+
+  tasks:
+    - include_vars: variables.yml
+   
+   #NOT USED FOR NOW
+    - name: Execute host command to check sub-domain IP
+      command: host {{ SITE_URL }}
+      register: myhost
+    #RESULT OF host command
+    - name: Execute host command
+      debug: msg=" retrun {{ myhost }}"
+
+    #Execute certbot command
+    #IMPROVMENT: an ansible pluggin exist, and could be used instead: https://galaxy.ansible.com/geerlingguy/certbot
+    #See also if certificate already exist... https://docs.ansible.com/ansible/latest/collections/ansible/builtin/expect_module.html 
+    - name: Execute certbot command for sub-domain 
+      command: certbot --nginx --email {{ certbot_contact_mail }} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual-public-ip-logging-ok -d "{{ SITE_URL }}" 
+      
+    # - name: Execute certbot command for sub-domain 
+      # command: certbot certonly --email {{ certbot_contact_mail }} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual-public-ip-logging-ok -d "{{ SITE_URL }}" 
+

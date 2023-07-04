@@ -1,0 +1,20 @@
+---
+#Use this script to ensure mysqsl DB exist for your app 
+- name: Configure mysql
+  hosts: web
+  tasks:
+    - include_vars: variables.yml
+
+    - name: Create Application Database
+      mysql_db:
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "{{ DB_NAME }}" 
+        state: present
+
+    - name: Create Application DB User
+      mysql_user: 
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        name: "{{ DB_USER }}"
+        password: "{{ DB_PASS }}"
+        priv: "{{ DB_NAME }}.*:ALL" 
+        state: present

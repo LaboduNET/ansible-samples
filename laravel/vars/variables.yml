@@ -1,0 +1,33 @@
+---
+# ./vars/name_vars.yml
+variable_file_name: "./vars/variables.yml"
+
+#List of packages to install on the server
+#see 1-New_Server_Setup.yml
+packages_list: ['nodejs','npm','mysql-server','mysql-client','php','php-cli','php-fpm','php-mysql','php-curl','php-json','php-xml','php-mbstring','php-bcmath','composer','nginx','letsencrypt','python3-certbot-nginx','python3-pymysql']
+
+#Your Domain and sub-domains.... to be improve
+#Used in 2-Cerbot.yml but only subdomain_staging for now
+#subdomain_staging: "staging.mydomain.org"
+certbot_contact_mail: "certbotcontactperson@mydomain.com"
+
+#Define the site to deploy can be:
+    #domain: "mydomain.org"
+    #subdomain_www: "wwww.mydomain.org"
+#USED by 2-Cerbot.yml  and 4-Create-Shared-Laravel-Structure.yml
+SITE_URL: 'toto.suivezledruide.org'
+SITE_ROOT_FOLDER: '/var/www'
+ #.env file variables
+APP_NAME: "MyGreatAPP"
+APP_KEY: "base64:pKo56dmA8pdtyVgUgdnBNMy+RLEppk2Ceq37AkIwRwE="
+
+#MYSQL variables
+DB_NAME: "laravel_app"
+DB_USER: "laravel"
+DB_PASS: "tobereplaced!"
+
+#Repo information used in 4-Create-Shared-Laravel-Structure.yml
+REPO: "https://github.com/laravel/laravel.git"
+REPO_TAG: 'v10.2.2'
+
+

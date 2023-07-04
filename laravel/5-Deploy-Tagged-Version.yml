@@ -1,0 +1,94 @@
+#DEPLOY a TAGGED VERSION OF OUR APP
+#WARING THIS SCRIPT RUN ONLY ONCE!!! YOU should rm -rf the tagged folder to rerun it!
+
+
+- hosts: web
+  
+  tasks:    
+    - include_vars: variables.yml
+      
+    - name: Clone specific Laravel tagged version
+      git:
+        repo: "{{ REPO }}"
+        dest: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"
+        version: "{{ REPO_TAG }}"
+      become: true                   
+
+    - name: Execute Composer Install to install dependencies
+      composer:
+        command: install
+        working_dir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"
+      environment:
+        COMPOSER_NO_INTERACTION: "1"
+        COMPOSER_ALLOW_SUPERUSER: "1"
+      become: true      
+        
+    - name: Create Symlink to .env
+      file:
+        src: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/shared/.env"
+        dest: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}/.env"
+        state: link
+        
+    - name: Remove local storage
+      file:
+        path: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}/storage"
+        state: absent
+        
+    # - name: Remove local storage
+      # command: rm -rf storage
+      # args:
+        # chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"
+        
+    - name: Create Symlink to storage
+      file:
+        src: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/shared/storage"
+        dest: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}/storage"
+        state: link
+        
+    - name: Change ownership
+      file:
+        path: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: 0775
+        recurse: yes      
+
+    - name: Run database migrations
+      command: "php artisan migrate --no-interaction --force" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}" 
+        
+    - name: Run php Artisan commands optimize
+      command: "php artisan optimize" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+ 
+    - name: Run php Artisan commands config:cache
+      command: "php artisan config:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+    - name: Run php Artisan commands route:cache
+      command: "php artisan route:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+    - name: Run php Artisan commands view:clear
+      command: "php artisan view:clear" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+        
+    - name: Run php Artisan commands config:cache
+      command: "php artisan config:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"    
+        
+    - name: Swith current site to new version
+      file:
+        src: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}/public"
+        dest: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/shared/public"        
+        state: link     
+        
+    - name: Redémarrage du service NGINX
+      service:
+        name: nginx
+        state: restarted        

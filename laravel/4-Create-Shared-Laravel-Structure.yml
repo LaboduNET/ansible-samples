@@ -1,0 +1,47 @@
+#This ansible script will create a shared filesystem structure to deploy laravel tagged version.
+#It allows us to share the .env file and the shared laravel objects
+- hosts: web
+    
+  tasks:    
+    - include_vars: variables.yml
+      
+#The shared files between releases      
+    - name: Creates shared directories
+      file:
+        path: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/{{item}}"
+        state: directory
+        # owner: www-data
+        # group: www-data
+        # mode: 0775
+        recurse: yes
+      loop:
+        - releases
+        - shared/storage/logs
+        - shared/storage/framework/sessions
+        - shared/storage/framework/testing
+        - shared/storage/framework/views
+        - shared/storage/framework/cache/data
+                
+    - name: Copy the .ENV file in shared folder
+      template:
+        src: .env.j2
+        dest: /var/www/{{ SITE_URL }}/shared/.env
+      become: true      
+
+    - name: Copy the nginx config file 
+      template:
+        src: nginx.j2
+        dest: /etc/nginx/sites-available/{{ SITE_URL }}
+      become: true   
+
+    - name: Remove default nginx symlink
+      file:
+        path: /etc/nginx/site-enable/default
+        state: absent
+      
+    - name: Add  nginx symlink
+      file:
+        src: /etc/nginx/sites-available/{{ SITE_URL }}
+        dest: /etc/nginx/sites-enabled/{{ SITE_URL }}
+        state: link
+
