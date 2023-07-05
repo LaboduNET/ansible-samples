@@ -23,9 +23,24 @@
     #Execute certbot command
     #IMPROVMENT: an ansible pluggin exist, and could be used instead: https://galaxy.ansible.com/geerlingguy/certbot
     #See also if certificate already exist... https://docs.ansible.com/ansible/latest/collections/ansible/builtin/expect_module.html 
-    - name: Execute certbot command for sub-domain 
+   
+
+#NB: Has we execute  certbot --nginx, we temporarly recreate default symlink , else it produce an error that sub-domain can't be deployed!
+    - name: Add  nginx symlink
+      file:
+        src: /etc/nginx/sites-available/default
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+    
+    - name: Execute certbot command for sub-domain with trying to install it on default nginx configuration 
       command: certbot --nginx --email {{ certbot_contact_mail }} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual-public-ip-logging-ok -d "{{ SITE_URL }}" 
-      
+
+#Remove default symlink
+    - name: Remove default nginx symlink
+      file:
+        path: /etc/nginx/site-enabled/default
+        state: absent
+        
     # - name: Execute certbot command for sub-domain 
       # command: certbot certonly --email {{ certbot_contact_mail }} --server https://acme-v02.api.letsencrypt.org/directory --agree-tos --manual-public-ip-logging-ok -d "{{ SITE_URL }}" 
 

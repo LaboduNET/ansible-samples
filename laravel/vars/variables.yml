@@ -15,7 +15,7 @@ certbot_contact_mail: "certbotcontactperson@mydomain.com"
     #domain: "mydomain.org"
     #subdomain_www: "wwww.mydomain.org"
 #USED by 2-Cerbot.yml  and 4-Create-Shared-Laravel-Structure.yml
-SITE_URL: 'toto.suivezledruide.org'
+SITE_URL: 'www.mondomain.org'
 SITE_ROOT_FOLDER: '/var/www'
  #.env file variables
 APP_NAME: "MyGreatAPP"
@@ -28,6 +28,6 @@ DB_PASS: "tobereplaced!"
 
 #Repo information used in 4-Create-Shared-Laravel-Structure.yml
 REPO: "https://github.com/laravel/laravel.git"
-REPO_TAG: 'v10.2.2'
+REPO_TAG: 'v10.2.4'
 
 

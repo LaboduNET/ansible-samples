@@ -1,0 +1,28 @@
+
+- hosts: web
+  
+  tasks:    
+    - include_vars: variables.yml
+    
+    - name: Run php Artisan commands optimize
+      command: "php artisan optimize" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+ 
+    - name: Run php Artisan commands config:cache
+      command: "php artisan config:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+    - name: Run php Artisan commands route:cache
+      command: "php artisan route:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+    - name: Run php Artisan commands view:clear
+      command: "php artisan view:clear" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"   
+        
+    - name: Run php Artisan commands config:cache
+      command: "php artisan config:cache" 
+      args:
+        chdir: "{{ SITE_ROOT_FOLDER }}/{{ SITE_URL }}/releases/{{ REPO_TAG }}"    
